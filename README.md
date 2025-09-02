@@ -38,7 +38,7 @@ java -jar target/websocket-proxy-1.0.0-standalone.jar \
   [-s]
 ```
 
-### Option 2: Using the launcher script (with lib/ folder)
+### Option 2: Using the launcher script (recommended)
 ```bash
 ./run-proxy.sh \
   -r <remote-host> \
