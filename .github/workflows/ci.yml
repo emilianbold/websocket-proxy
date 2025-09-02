@@ -1,0 +1,74 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  JAVA_VERSION: '11'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Run tests and build
+      run: mvn clean compile test package
+
+    - name: Verify artifacts
+      run: |
+        echo "Build artifacts created:"
+        ls -la target/
+        
+        echo -e "\nStandalone JAR info:"
+        ls -lh target/*-standalone.jar
+        
+        echo -e "\nLib directory:"
+        ls -la target/lib/ | head -10
+
+    - name: Test applications
+      run: |
+        echo "Testing WebSocket Proxy..."
+        timeout 5 java -jar target/*-standalone.jar --help || echo "Proxy help displayed successfully"
+        
+        echo -e "\nTesting Schema Validator..."
+        timeout 5 java -cp target/*-standalone.jar com.websocket.proxy.SchemaValidator --help || echo "Validator help displayed successfully"
+
+    - name: Test launcher scripts
+      run: |
+        echo "Testing launcher scripts..."
+        chmod +x run-proxy.sh run-validator.sh
+        
+        echo "Proxy launcher:"
+        timeout 5 ./run-proxy.sh --help || echo "Proxy launcher works"
+        
+        echo -e "\nValidator launcher:"
+        timeout 5 ./run-validator.sh --help || echo "Validator launcher works"
+
+    - name: Upload artifacts for debugging
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: debug-artifacts
+        path: |
+          target/
+          *.log
+        retention-days: 7

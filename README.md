@@ -1,5 +1,8 @@
 # WebSocket Proxy with JSON-RPC Logging
 
+[![CI](https://github.com/YOUR_USERNAME/websocket-proxy/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/websocket-proxy/actions/workflows/ci.yml)
+[![Release](https://github.com/YOUR_USERNAME/websocket-proxy/actions/workflows/build-and-release.yml/badge.svg)](https://github.com/YOUR_USERNAME/websocket-proxy/actions/workflows/build-and-release.yml)
+
 A transparent WebSocket proxy that logs all traffic, with special support for JSON-RPC 2.0 messages.
 
 ## Features
@@ -14,7 +17,15 @@ A transparent WebSocket proxy that logs all traffic, with special support for JS
 - PCAP file generation for Wireshark analysis
 - JSON Schema validation tool for message compliance checking
 
-## Building
+## Installation
+
+### Option 1: Download Pre-built Binaries (Recommended)
+
+Download the latest release from [GitHub Releases](../../releases):
+- **websocket-proxy-VERSION-standalone.jar** - Single executable JAR file
+- **websocket-proxy-VERSION-complete.zip** - Complete package with scripts and schemas
+
+### Option 2: Build from Source
 
 ```bash
 mvn clean package
