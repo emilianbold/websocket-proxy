@@ -21,10 +21,10 @@ EOF
 echo "Sample log file created: test_session.log"
 echo ""
 
-# Compile if needed
-if [ ! -f "target/classes/com/websocket/proxy/SchemaValidator.class" ]; then
-    echo "Compiling project..."
-    mvn compile
+# Build if needed
+if [ ! -f "target/websocket-proxy-1.0.0.jar" ] || [ ! -d "target/lib" ]; then
+    echo "Building project..."
+    mvn clean package
 fi
 
 echo "Running schema validator with different output formats:"
@@ -32,8 +32,7 @@ echo ""
 
 echo "1. Summary format:"
 echo "-----------------"
-java -cp "target/classes:$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q)" \
-    com.websocket.proxy.SchemaValidator \
+./run-validator.sh \
     --log-file test_session.log \
     --schema-dir schemas \
     --format summary
@@ -41,8 +40,7 @@ java -cp "target/classes:$(mvn dependency:build-classpath -Dmdep.outputFile=/dev
 echo ""
 echo "2. Detailed format:"
 echo "-------------------"
-java -cp "target/classes:$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q)" \
-    com.websocket.proxy.SchemaValidator \
+./run-validator.sh \
     --log-file test_session.log \
     --schema-dir schemas \
     --format detailed
@@ -50,8 +48,7 @@ java -cp "target/classes:$(mvn dependency:build-classpath -Dmdep.outputFile=/dev
 echo ""
 echo "3. JSON format (truncated for display):"
 echo "---------------------------------------"
-java -cp "target/classes:$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q)" \
-    com.websocket.proxy.SchemaValidator \
+./run-validator.sh \
     --log-file test_session.log \
     --schema-dir schemas \
     --format json | head -20

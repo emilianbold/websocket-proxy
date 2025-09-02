@@ -20,12 +20,39 @@ A transparent WebSocket proxy that logs all traffic, with special support for JS
 mvn clean package
 ```
 
-This creates an executable JAR in `target/websocket-proxy-1.0.0.jar`
+This creates:
+- `target/websocket-proxy-1.0.0.jar` - Main application JAR
+- `target/websocket-proxy-1.0.0-standalone.jar` - Standalone JAR with all dependencies
+- `target/lib/` - Directory containing all dependency JARs
 
 ## Usage
 
+### Option 1: Using the standalone JAR (simplest)
 ```bash
-java -jar target/websocket-proxy-1.0.0.jar \
+java -jar target/websocket-proxy-1.0.0-standalone.jar \
+  -r <remote-host> \
+  -p <remote-port> \
+  -l <local-port> \
+  [-u <path>] \
+  [-d <log-directory>] \
+  [-s]
+```
+
+### Option 2: Using the launcher script (with lib/ folder)
+```bash
+./run-proxy.sh \
+  -r <remote-host> \
+  -p <remote-port> \
+  -l <local-port> \
+  [-u <path>] \
+  [-d <log-directory>] \
+  [-s]
+```
+
+### Option 3: Manual classpath (with lib/ folder)
+```bash
+java -cp "target/websocket-proxy-1.0.0.jar:target/lib/*" \
+  com.websocket.proxy.WebSocketProxy \
   -r <remote-host> \
   -p <remote-port> \
   -l <local-port> \
@@ -47,13 +74,16 @@ java -jar target/websocket-proxy-1.0.0.jar \
 
 ```bash
 # Proxy local port 8080 to remote WebSocket server at example.com:9000
-java -jar target/websocket-proxy-1.0.0.jar -r example.com -p 9000 -l 8080
+./run-proxy.sh -r example.com -p 9000 -l 8080
 
 # Proxy with WSS and custom path
-java -jar target/websocket-proxy-1.0.0.jar -r example.com -p 443 -l 8080 -u /ws -s
+./run-proxy.sh -r example.com -p 443 -l 8080 -u /ws -s
 
 # Custom log directory
-java -jar target/websocket-proxy-1.0.0.jar -r localhost -p 3000 -l 8080 -d /var/log/ws-proxy
+./run-proxy.sh -r localhost -p 3000 -l 8080 -d /var/log/ws-proxy
+
+# Using standalone JAR
+java -jar target/websocket-proxy-1.0.0-standalone.jar -r example.com -p 9000 -l 8080
 ```
 
 ## Log Files
@@ -84,10 +114,16 @@ The generated PCAP files can be opened in Wireshark or similar tools:
 The proxy includes a separate schema validation tool to verify that captured JSON messages conform to expected schemas:
 
 ```bash
-java -cp target/websocket-proxy-1.0.0.jar com.websocket.proxy.SchemaValidator \
-  --log-file logs/session_*.log \
-  --schema-dir ./schemas \
-  --format detailed
+# Using the launcher script
+./run-validator.sh --log-file logs/session_*.log --schema-dir ./schemas --format detailed
+
+# Using standalone JAR  
+java -cp target/websocket-proxy-1.0.0-standalone.jar com.websocket.proxy.SchemaValidator \
+  --log-file logs/session_*.log --schema-dir ./schemas --format detailed
+
+# Using manual classpath
+java -cp "target/websocket-proxy-1.0.0.jar:target/lib/*" com.websocket.proxy.SchemaValidator \
+  --log-file logs/session_*.log --schema-dir ./schemas --format detailed
 ```
 
 See [SCHEMA_VALIDATION.md](SCHEMA_VALIDATION.md) for detailed documentation on schema validation.
