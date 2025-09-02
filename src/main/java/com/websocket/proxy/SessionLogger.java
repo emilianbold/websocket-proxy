@@ -20,10 +20,12 @@ public class SessionLogger {
     private final PrintWriter jsonLogWriter;
     private final SimpleDateFormat timestampFormat;
     private final int connectionId;
+    private final PcapWriter pcapWriter;
     
     private StringBuilder partialJsonBuffer = new StringBuilder();
     
-    public SessionLogger(String logDirectory, String sessionId, int connectionId) {
+    public SessionLogger(String logDirectory, String sessionId, int connectionId, 
+                        String serverHost, int clientPort, int serverPort) {
         this.connectionId = connectionId;
         this.objectMapper = new ObjectMapper();
         this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -38,10 +40,13 @@ public class SessionLogger {
             logDirectory, sessionId, connectionId);
         String jsonLogFile = String.format("%s/session_%s_conn_%d_json.log", 
             logDirectory, sessionId, connectionId);
+        String pcapFile = String.format("%s/session_%s_conn_%d.pcap",
+            logDirectory, sessionId, connectionId);
         
         try {
             this.rawLogWriter = new PrintWriter(new FileWriter(rawLogFile, true));
             this.jsonLogWriter = new PrintWriter(new FileWriter(jsonLogFile, true));
+            this.pcapWriter = new PcapWriter(pcapFile, serverHost, clientPort, serverPort);
             
             logEvent("SESSION_START", String.format("Connection #%d logging started", connectionId));
             
@@ -55,6 +60,18 @@ public class SessionLogger {
         
         rawLogWriter.printf("[%s] [CONN_%d] [%s] %s%n", timestamp, connectionId, direction, message);
         rawLogWriter.flush();
+        
+        // Write to PCAP
+        try {
+            byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
+            if ("CLIENT_TO_SERVER".equals(direction)) {
+                pcapWriter.writeClientToServer(messageBytes);
+            } else if ("SERVER_TO_CLIENT".equals(direction)) {
+                pcapWriter.writeServerToClient(messageBytes);
+            }
+        } catch (IOException e) {
+            logger.warn("Failed to write to PCAP file", e);
+        }
         
         try {
             JsonNode jsonNode = objectMapper.readTree(message);
@@ -103,6 +120,17 @@ public class SessionLogger {
         jsonLogWriter.printf("[%s] [CONN_%d] [%s] [BINARY] %d bytes%n", 
             timestamp, connectionId, direction, data.length);
         jsonLogWriter.flush();
+        
+        // Write to PCAP
+        try {
+            if ("CLIENT_TO_SERVER".equals(direction)) {
+                pcapWriter.writeClientToServer(data);
+            } else if ("SERVER_TO_CLIENT".equals(direction)) {
+                pcapWriter.writeServerToClient(data);
+            }
+        } catch (IOException e) {
+            logger.warn("Failed to write binary data to PCAP file", e);
+        }
     }
     
     public synchronized void logEvent(String eventType, String description) {
@@ -197,6 +225,13 @@ public class SessionLogger {
         }
         if (jsonLogWriter != null) {
             jsonLogWriter.close();
+        }
+        if (pcapWriter != null) {
+            try {
+                pcapWriter.close();
+            } catch (IOException e) {
+                logger.warn("Failed to close PCAP writer", e);
+            }
         }
     }
 }

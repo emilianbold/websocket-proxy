@@ -11,6 +11,7 @@ A transparent WebSocket proxy that logs all traffic, with special support for JS
 - Supports both text and binary WebSocket messages
 - Concurrent connection support
 - Separate raw and JSON-formatted log files
+- PCAP file generation for Wireshark analysis
 
 ## Building
 
@@ -56,10 +57,11 @@ java -jar target/websocket-proxy-1.0.0.jar -r localhost -p 3000 -l 8080 -d /var/
 
 ## Log Files
 
-The proxy creates two log files per connection:
+The proxy creates three log files per connection:
 
-1. **Raw log** (`session_<timestamp>_conn_<id>_raw.log`): Complete raw messages
+1. **Raw log** (`session_<timestamp>_conn_<id>_raw.log`): Complete raw messages with timestamps
 2. **JSON log** (`session_<timestamp>_conn_<id>_json.log`): Parsed and formatted JSON/JSON-RPC messages
+3. **PCAP file** (`session_<timestamp>_conn_<id>.pcap`): Network capture format compatible with Wireshark
 
 ### JSON-RPC Support
 
@@ -67,6 +69,14 @@ The proxy automatically detects and formats JSON-RPC 2.0 messages, showing:
 - Request method, ID, and parameters
 - Response ID and result
 - Error codes, messages, and data
+
+### PCAP Analysis
+
+The generated PCAP files can be opened in Wireshark or similar tools:
+- Contains synthetic TCP/IP headers for compatibility
+- WebSocket frames are properly formatted
+- Allows filtering and analysis of WebSocket traffic
+- Useful for debugging protocol issues
 
 ## Client Configuration
 

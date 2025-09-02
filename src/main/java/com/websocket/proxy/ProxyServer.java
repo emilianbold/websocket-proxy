@@ -32,12 +32,16 @@ public class ProxyServer extends WebSocketServer {
         logger.info("New client connection from: {}", clientConn.getRemoteSocketAddress());
         
         try {
+            // Get the local port from the client connection
+            int clientPort = clientConn.getRemoteSocketAddress().getPort();
+            
             ProxyConnection proxyConnection = new ProxyConnection(
                 clientConn, 
                 remoteUri, 
                 logDirectory, 
                 sessionId,
-                connections.size() + 1
+                connections.size() + 1,
+                clientPort
             );
             
             connections.put(clientConn, proxyConnection);

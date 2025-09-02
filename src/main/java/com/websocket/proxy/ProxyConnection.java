@@ -19,11 +19,20 @@ public class ProxyConnection {
     private final int connectionId;
     
     public ProxyConnection(WebSocket clientConnection, URI remoteUri, String logDirectory, 
-                          String sessionId, int connectionId) {
+                          String sessionId, int connectionId, int clientPort) {
         this.clientConnection = clientConnection;
         this.remoteUri = remoteUri;
         this.connectionId = connectionId;
-        this.sessionLogger = new SessionLogger(logDirectory, sessionId, connectionId);
+        
+        // Extract server host and port from URI
+        String serverHost = remoteUri.getHost();
+        int serverPort = remoteUri.getPort();
+        if (serverPort == -1) {
+            serverPort = "wss".equals(remoteUri.getScheme()) ? 443 : 80;
+        }
+        
+        this.sessionLogger = new SessionLogger(logDirectory, sessionId, connectionId,
+                                              serverHost, clientPort, serverPort);
     }
     
     public void connect() {
