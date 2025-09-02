@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "server-to-client-notification",
+  "title": "Server Notification",
+  "description": "Schema for server-initiated notifications",
+  "type": "object",
+  "properties": {
+    "jsonrpc": {
+      "type": "string",
+      "const": "2.0"
+    },
+    "method": {
+      "type": "string",
+      "minLength": 1
+    },
+    "params": {
+      "oneOf": [
+        { "type": "object" },
+        { "type": "array" }
+      ]
+    }
+  },
+  "required": ["jsonrpc", "method"],
+  "additionalProperties": false,
+  "not": {
+    "required": ["id"]
+  }
+}

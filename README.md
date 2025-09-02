@@ -12,6 +12,7 @@ A transparent WebSocket proxy that logs all traffic, with special support for JS
 - Concurrent connection support
 - Separate raw and JSON-formatted log files
 - PCAP file generation for Wireshark analysis
+- JSON Schema validation tool for message compliance checking
 
 ## Building
 
@@ -77,6 +78,19 @@ The generated PCAP files can be opened in Wireshark or similar tools:
 - WebSocket frames are properly formatted
 - Allows filtering and analysis of WebSocket traffic
 - Useful for debugging protocol issues
+
+## JSON Schema Validation
+
+The proxy includes a separate schema validation tool to verify that captured JSON messages conform to expected schemas:
+
+```bash
+java -cp target/websocket-proxy-1.0.0.jar com.websocket.proxy.SchemaValidator \
+  --log-file logs/session_*.log \
+  --schema-dir ./schemas \
+  --format detailed
+```
+
+See [SCHEMA_VALIDATION.md](SCHEMA_VALIDATION.md) for detailed documentation on schema validation.
 
 ## Client Configuration
 

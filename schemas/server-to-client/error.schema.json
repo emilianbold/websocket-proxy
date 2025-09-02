@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "server-to-client-error",
+  "title": "JSON-RPC Error Response",
+  "description": "Schema for JSON-RPC error response messages",
+  "type": "object",
+  "properties": {
+    "jsonrpc": {
+      "type": "string",
+      "const": "2.0"
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "description": "Error code"
+        },
+        "message": {
+          "type": "string",
+          "description": "Error message"
+        },
+        "data": {
+          "description": "Additional error data"
+        }
+      },
+      "required": ["code", "message"],
+      "additionalProperties": false
+    },
+    "id": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "null" }
+      ]
+    }
+  },
+  "required": ["jsonrpc", "error", "id"],
+  "additionalProperties": false
+}

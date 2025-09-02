@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "client-to-server-initialize",
+  "title": "Initialize Request",
+  "description": "Schema for initialize method request",
+  "type": "object",
+  "properties": {
+    "jsonrpc": {
+      "type": "string",
+      "const": "2.0"
+    },
+    "method": {
+      "type": "string",
+      "const": "initialize"
+    },
+    "params": {
+      "type": "object",
+      "properties": {
+        "clientId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "clientVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "supportedFormats": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["json", "msgpack", "protobuf"]
+              }
+            }
+          }
+        }
+      },
+      "required": ["clientId", "clientVersion"]
+    },
+    "id": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" }
+      ]
+    }
+  },
+  "required": ["jsonrpc", "method", "params", "id"],
+  "additionalProperties": false
+}

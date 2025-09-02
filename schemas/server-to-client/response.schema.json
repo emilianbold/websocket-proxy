@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "server-to-client-response",
+  "title": "JSON-RPC Response",
+  "description": "Schema for JSON-RPC response messages",
+  "type": "object",
+  "properties": {
+    "jsonrpc": {
+      "type": "string",
+      "const": "2.0"
+    },
+    "result": {
+      "description": "Response result - can be any type"
+    },
+    "id": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "null" }
+      ]
+    }
+  },
+  "required": ["jsonrpc", "result", "id"],
+  "additionalProperties": false
+}
