@@ -57,7 +57,7 @@ jobs:
         timeout 5 java -cp target/websocket-proxy-*-standalone.jar com.websocket.proxy.SchemaValidator --help || true
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: websocket-proxy-jars
         path: |
