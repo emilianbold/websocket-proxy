@@ -35,13 +35,21 @@ public class ProxyServer extends WebSocketServer {
             // Get the local port from the client connection
             int clientPort = clientConn.getRemoteSocketAddress().getPort();
             
+            // Extract subprotocols from client handshake
+            String subprotocols = null;
+            if (handshake.hasFieldValue("Sec-WebSocket-Protocol")) {
+                subprotocols = handshake.getFieldValue("Sec-WebSocket-Protocol");
+                logger.info("Client requesting subprotocols: {}", subprotocols);
+            }
+            
             ProxyConnection proxyConnection = new ProxyConnection(
                 clientConn, 
                 remoteUri, 
                 logDirectory, 
                 sessionId,
                 connections.size() + 1,
-                clientPort
+                clientPort,
+                subprotocols
             );
             
             connections.put(clientConn, proxyConnection);

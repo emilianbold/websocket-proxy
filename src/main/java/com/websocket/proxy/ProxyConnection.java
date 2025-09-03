@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProxyConnection {
     private static final Logger logger = LoggerFactory.getLogger(ProxyConnection.class);
@@ -17,12 +19,14 @@ public class ProxyConnection {
     private final SessionLogger sessionLogger;
     private WebSocketClient serverConnection;
     private final int connectionId;
+    private final String subprotocols;
     
     public ProxyConnection(WebSocket clientConnection, URI remoteUri, String logDirectory, 
-                          String sessionId, int connectionId, int clientPort) {
+                          String sessionId, int connectionId, int clientPort, String subprotocols) {
         this.clientConnection = clientConnection;
         this.remoteUri = remoteUri;
         this.connectionId = connectionId;
+        this.subprotocols = subprotocols;
         
         // Extract server host and port from URI
         String serverHost = remoteUri.getHost();
@@ -38,11 +42,25 @@ public class ProxyConnection {
     public void connect() {
         logger.info("Establishing connection #{} to remote server: {}", connectionId, remoteUri);
         
-        serverConnection = new WebSocketClient(remoteUri) {
+        // Create headers map with subprotocol if present
+        Map<String, String> headers = new HashMap<>();
+        if (subprotocols != null && !subprotocols.isEmpty()) {
+            headers.put("Sec-WebSocket-Protocol", subprotocols);
+            logger.info("Forwarding subprotocols to server: {}", subprotocols);
+        }
+        
+        serverConnection = new WebSocketClient(remoteUri, headers) {
             @Override
             public void onOpen(ServerHandshake handshake) {
                 logger.info("Connection #{} established to remote server", connectionId);
                 sessionLogger.logEvent("CONNECTION_ESTABLISHED", "Connected to " + remoteUri);
+                
+                // Check if server selected a subprotocol
+                if (handshake.hasFieldValue("Sec-WebSocket-Protocol")) {
+                    String selectedProtocol = handshake.getFieldValue("Sec-WebSocket-Protocol");
+                    logger.info("Server selected subprotocol: {}", selectedProtocol);
+                    sessionLogger.logEvent("SUBPROTOCOL_SELECTED", selectedProtocol);
+                }
             }
             
             @Override
